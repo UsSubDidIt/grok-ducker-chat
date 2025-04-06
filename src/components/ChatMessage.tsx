@@ -1,6 +1,6 @@
-
-import React, { useState } from 'react';
+import React, { useState, ReactNode } from 'react';
 import { UserCircle } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import ThinkingBlock from './ThinkingBlock';
 import WidgetCard from './WidgetCard';
 import WarningMessage from './WarningMessage';
@@ -10,23 +10,25 @@ import { Message } from '../lib/db';
 interface ChatMessageProps {
   message: Message;
   thinkingTime?: number;
+  streamingContent?: string;
   onShowWidget?: (content: string) => void;
 }
 
-const ChatMessage: React.FC<ChatMessageProps> = ({ 
-  message, 
+const ChatMessage: React.FC<ChatMessageProps> = ({
+  message,
   thinkingTime,
+  streamingContent,
   onShowWidget
 }) => {
   const [widgetVersions, setWidgetVersions] = useState<Record<string, number>>({});
   
   // 解析消息内容
-  const { 
-    parsedMessage, 
-    thinking, 
-    widgets, 
-    hasWarning 
-  } = parseMessage(message.content);
+  const {
+    parsedMessage,
+    thinking,
+    widgets,
+    hasWarning
+  } = parseMessage(streamingContent || message.content);
 
   // 获取项目的版本号
   const getWidgetVersion = (project: string) => {
@@ -49,6 +51,67 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     );
   }
 
+  // 处理消息内容，将Widget占位符替换为实际组件
+  const renderMessageContent = () => {
+    // 如果没有Widget，直接返回消息内容
+    if (widgets.length === 0) {
+      return (
+        <ReactMarkdown
+          components={{
+            p: ({ children }) => <div className="mb-2">{children}</div>,
+            br: () => <br />
+          }}
+        >
+          {parsedMessage}
+        </ReactMarkdown>
+      );
+    }
+
+    // 将消息内容按Widget占位符分割
+    const parts = parsedMessage.split(/(__WIDGET_PLACEHOLDER_\d+__)/);
+    
+    return parts.map((part, index) => {
+      // 检查是否是Widget占位符
+      const placeholderMatch = part.match(/__WIDGET_PLACEHOLDER_(\d+)__/);
+      
+      if (placeholderMatch) {
+        const widgetIndex = parseInt(placeholderMatch[1], 10);
+        const widget = widgets[widgetIndex];
+        
+        if (widget) {
+          return (
+            <div key={`widget-${index}`} className="my-2">
+              <WidgetCard
+                project={widget.project}
+                summary={widget.summary}
+                content={widget.content}
+                version={getWidgetVersion(widget.project)}
+                onClick={() => onShowWidget && onShowWidget(widget.content)}
+              />
+            </div>
+          );
+        }
+      }
+      
+      // 普通文本内容
+      if (part.trim()) {
+        return (
+          <ReactMarkdown
+            key={`text-${index}`}
+            components={{
+              p: ({ children }) => <div className="mb-2">{children}</div>,
+              br: () => <br />
+            }}
+          >
+            {part}
+          </ReactMarkdown>
+        );
+      }
+      
+      return null;
+    });
+  };
+
   // 渲染AI消息
   return (
     <div className="ai-message">
@@ -57,26 +120,18 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
           <span className="text-xs font-bold text-white">C</span>
         </div>
         <div className="flex-1">
-          {parsedMessage}
-          
-          {/* 显示思考块 */}
+          {/* 显示思考块 - 放在消息最前面 */}
           {thinking.length > 0 && (
-            <ThinkingBlock 
-              content={thinking[0]} 
+            <ThinkingBlock
+              content={thinking[0]}
               thinkingTime={thinkingTime}
             />
           )}
           
-          {/* 显示Widget卡片 */}
-          {widgets.map((widget, index) => (
-            <WidgetCard 
-              key={index}
-              project={widget.project}
-              content={widget.content}
-              version={getWidgetVersion(widget.project)}
-              onClick={() => onShowWidget && onShowWidget(widget.content)}
-            />
-          ))}
+          {/* 渲染消息内容，包括内联的Widget */}
+          <div className="markdown-content">
+            {renderMessageContent()}
+          </div>
           
           {/* 显示警告信息 */}
           {hasWarning && <WarningMessage />}
