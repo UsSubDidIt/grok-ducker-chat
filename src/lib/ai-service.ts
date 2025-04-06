@@ -111,8 +111,8 @@ export const sendMessageToAI = async (
       body: JSON.stringify({
         model: MODEL_NAME,
         messages: requestMessages,
-        temperature: 0.7,
-        max_tokens: 1000,
+        temperature: 0.45,
+        max_tokens: 4096,
         stream: true // 启用流式响应
       }),
       signal // 添加信号以支持取消
