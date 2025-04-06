@@ -6,6 +6,7 @@ import CodeWindow from './CodeWindow';
 import { sendMessageToAI, generateId, generateConversationTitle, cancelCurrentRequest } from '../lib/ai-service';
 import { saveMessage, getConversationMessages, saveConversation, Message, Conversation } from '../lib/db';
 import { parseMessage } from '../lib/ai-service';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 
 interface ChatProps {
   conversationId: string;
@@ -237,83 +238,59 @@ const Chat: React.FC<ChatProps> = ({ conversationId }) => {
   };
 
   return (
-    <div className="flex h-full">
-      <div className={`flex flex-col h-full ${activeWidget ? 'w-1/3' : 'w-full'} transition-all duration-200`}>
-        {/* 聊天消息区域 */}
-        <div className="flex-1 overflow-y-auto p-4">
-          {messages.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-grok-gray">
-              <div className="text-3xl font-bold mb-2">Co-Ducker</div>
-              <div className="text-sm">AI对话助手，开始聊天吧！</div>
-            </div>
-          ) : (
-            messages.map((message, index) => (
-              <ChatMessage
-                key={message.id}
-                message={message}
-                thinkingTime={
-                  message.role === 'assistant' &&
-                  index === messages.length - 1 ?
-                  thinkingTime : undefined
-                }
-                streamingContent={
-                  message.role === 'assistant' &&
-                  index === messages.length - 1 &&
-                  isProcessing ?
-                  streamingContent : undefined
-                }
-                onShowWidget={handleShowWidget}
-              />
-            ))
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-        
-        {/* 底部输入区域 */}
-        <div className="p-4 border-t border-grok-gray/20">
-          <div className="flex items-center justify-between mb-2">
-            <div>
-              {isProcessing ? (
-                <div className="flex items-center">
-                  <div className="text-xs text-grok-gray flex items-center">
-                    <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                    Co-Ducker 正在回复...
-                  </div>
-                  <button
-                    className="ml-2 text-xs flex items-center text-destructive hover:text-destructive/80 transition-colors"
-                    onClick={handleCancelResponse}
-                  >
-                    <X className="h-3 w-3 mr-1" />
-                    停止生成
-                  </button>
+    <ResizablePanelGroup direction="horizontal">
+      {/* 对话区域 */}
+      <ResizablePanel defaultSize={activeWidget ? 40 : 100} minSize={30}>
+        <div className="h-full flex flex-col">
+          <div className="flex-1 overflow-y-auto">
+            <div className="container mx-auto max-w-4xl p-4 space-y-4">
+              {messages.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-grok-gray">
+                  <div className="text-3xl font-bold mb-2">Co-Ducker</div>
+                  <div className="text-sm">AI对话助手，开始聊天吧！</div>
                 </div>
               ) : (
-                messages.length > 0 && messages[messages.length - 1].role === 'user' && (
-                  <button
-                    className="text-xs flex items-center text-grok-gray hover:text-primary transition-colors"
-                    onClick={handleRetry}
-                  >
-                    <RefreshCw className="h-3 w-3 mr-1" />
-                    重新生成回复
-                  </button>
-                )
+                messages.map((message, index) => (
+                  <ChatMessage
+                    key={message.id}
+                    message={message}
+                    thinkingTime={
+                      message.role === 'assistant' &&
+                      index === messages.length - 1 ?
+                      thinkingTime : undefined
+                    }
+                    streamingContent={
+                      message.role === 'assistant' &&
+                      index === messages.length - 1 &&
+                      isProcessing ?
+                      streamingContent : undefined
+                    }
+                    onShowWidget={handleShowWidget}
+                  />
+                ))
               )}
+              <div ref={messagesEndRef} />
             </div>
           </div>
           <ChatInput onSendMessage={handleSendMessage} isProcessing={isProcessing} />
         </div>
-      </div>
-      
-      {/* 代码窗口 */}
+      </ResizablePanel>
+
+      {/* 代码查看器 */}
       {activeWidget && (
-        <div className="w-2/3 h-full animate-slide-in">
-          <CodeWindow 
-            content={activeWidget} 
-            onClose={() => setActiveWidget(null)} 
-          />
-        </div>
+        <>
+          <ResizableHandle withHandle />
+          <ResizablePanel defaultSize={60} minSize={30}>
+            <div className="h-full animate-slide-in">
+              <CodeWindow 
+                content={activeWidget} 
+                onClose={() => setActiveWidget(null)} 
+              />
+            </div>
+          </ResizablePanel>
+        </>
       )}
-    </div>
+    </ResizablePanelGroup>
   );
 };
 

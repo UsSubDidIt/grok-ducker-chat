@@ -44,7 +44,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     return (
       <div className="user-message">
         <div className="flex gap-2">
-          <div className="flex-1">{message.content}</div>
+          <div className="flex-1 break-words whitespace-pre-wrap">{message.content}</div>
           <UserCircle className="h-5 w-5 text-grok-gray flex-shrink-0" />
         </div>
       </div>
@@ -58,7 +58,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
       return (
         <ReactMarkdown
           components={{
-            p: ({ children }) => <div className="mb-2">{children}</div>,
+            p: ({ children }) => <div className="mb-2 break-words whitespace-pre-wrap">{children}</div>,
+            code: ({ children }) => <code className="break-words whitespace-pre-wrap">{children}</code>,
             br: () => <br />
           }}
         >
@@ -99,7 +100,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
           <ReactMarkdown
             key={`text-${index}`}
             components={{
-              p: ({ children }) => <div className="mb-2">{children}</div>,
+              p: ({ children }) => <div className="mb-2 break-words whitespace-pre-wrap">{children}</div>,
+              code: ({ children }) => <code className="break-words whitespace-pre-wrap">{children}</code>,
               br: () => <br />
             }}
           >

@@ -1,11 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { X, Copy, Check } from 'lucide-react';
-import hljs from 'highlight.js/lib/core';
-import javascript from 'highlight.js/lib/languages/javascript';
-import 'highlight.js/styles/atom-one-dark.css';
-
-hljs.registerLanguage('javascript', javascript);
-hljs.registerLanguage('javascript', javascript);
+import React, { useRef, useEffect, useState } from 'react';
+import { Check, Copy, Download } from 'lucide-react';
+import hljs from 'highlight.js';
 
 interface CodeWindowProps {
   content: string;
@@ -21,14 +16,41 @@ const CodeWindow: React.FC<CodeWindowProps> = ({ content, onClose }) => {
       hljs.highlightElement(codeRef.current);
     }
   }, [content]);
-  
+
   // 复制代码到剪贴板
   const handleCopy = () => {
     navigator.clipboard.writeText(content).then(() => {
       setCopied(true);
-      // 2秒后重置复制状态
       setTimeout(() => setCopied(false), 2000);
     });
+  };
+
+  // 下载控件代码
+  const handleDownload = () => {
+    try {
+      // 从内容中提取 project 参数
+      const projectMatch = content.match(/project="([^"]+)"/);
+      const fileName = projectMatch ? projectMatch[1] : 'widget';
+
+      // 创建 Blob 对象
+      const blob = new Blob([content], { type: 'text/plain' });
+      
+      // 创建下载链接
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName; // 使用 project 参数作为文件名，不带后缀
+      
+      // 触发下载
+      document.body.appendChild(link);
+      link.click();
+      
+      // 清理
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('下载失败:', error);
+    }
   };
 
   return (
@@ -48,16 +70,18 @@ const CodeWindow: React.FC<CodeWindowProps> = ({ content, onClose }) => {
             )}
           </button>
           <button
-            onClick={onClose}
-            className="p-1 hover:bg-grok-gray/20 rounded-full transition-colors"
+            onClick={handleDownload}
+            className="flex items-center gap-1 px-3 py-1 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+            title="下载控件代码"
           >
-            <X className="h-4 w-4" />
+            <Download className="h-4 w-4" />
+            <span className="text-sm">下载</span>
           </button>
         </div>
       </div>
-      <div className="overflow-auto flex-1 p-4">
-        <pre className="h-full">
-          <code ref={codeRef} className="javascript rounded-md h-full">
+      <div className="flex-1 overflow-auto p-4">
+        <pre className="h-full m-0">
+          <code ref={codeRef} className="language-javascript">
             {content}
           </code>
         </pre>

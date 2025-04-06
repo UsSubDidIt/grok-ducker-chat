@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, ChevronLeft } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ConversationList from '../components/ConversationList';
 import Chat from '../components/Chat';
@@ -64,7 +64,7 @@ const Index = () => {
       <div 
         className={`${
           isSidebarOpen ? 'w-72' : 'w-0'
-        } transition-all duration-300 border-r border-grok-gray/20 overflow-hidden`}
+        } transition-all duration-300 border-r border-grok-gray/20 overflow-hidden relative`}
       >
         <div className="h-full flex flex-col">
           <div className="p-4 border-b border-grok-gray/20 flex justify-between items-center">
@@ -85,6 +85,14 @@ const Index = () => {
               onNewConversation={handleNewConversation}
             />
           </div>
+          {/* 添加侧边栏底部的展开/收起按钮 */}
+          <button
+            className="absolute bottom-4 right-4 p-2 text-foreground hover:bg-grok-gray/20 rounded-md transition-colors"
+            onClick={toggleSidebar}
+            title={isSidebarOpen ? "折叠侧边栏" : "展开侧边栏"}
+          >
+            <ChevronLeft className={`h-5 w-5 transition-transform ${isSidebarOpen ? '' : 'rotate-180'}`} />
+          </button>
         </div>
       </div>
       
@@ -110,14 +118,7 @@ const Index = () => {
           </div>
         )}
         
-        {/* 右下角折叠按钮 */}
-        <button
-          className="absolute bottom-4 right-4 p-2 bg-primary text-white rounded-full shadow-lg hover:bg-primary/90 transition-colors"
-          onClick={toggleSidebar}
-          title={isSidebarOpen ? "折叠侧边栏" : "展开侧边栏"}
-        >
-          {isSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+        {/* 移除右下角浮动按钮 */}
       </div>
     </div>
   );
