@@ -1,9 +1,9 @@
 import { Message } from './db';
 
 // API信息
-const API_BASE_URL = 'https://bad-bear-67.deno.dev/v1beta/openai/chat/completions';
-const API_KEY = 'sk-dummy-key'; // 实际开发中这应该通过环境变量安全管理
-const MODEL_NAME = 'gemini-2.0-flash';
+const API_BASE_URL = 'https://bad-bear-67.deno.dev/api/v1/chat/completions';
+const API_KEY = '7e499853ee776f7932ce20f84e7555281409a54b'; // 实际开发中这应该通过环境变量安全管理
+const MODEL_NAME = 'openrouter/quasar-alpha';
 const SYSTEM_PROMPT_FILE = 'system-prompt.txt';
 
 // 从文件读取系统提示词
