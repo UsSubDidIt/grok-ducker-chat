@@ -2,6 +2,7 @@ import React, { useState, ReactNode } from 'react';
 import { UserCircle } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import ThinkingBlock from './ThinkingBlock';
+import PlannerBlock from './PlannerBlock';
 import WidgetCard from './WidgetCard';
 import WarningMessage from './WarningMessage';
 import { parseMessage } from '../lib/ai-service';
@@ -21,12 +22,13 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   onShowWidget
 }) => {
   const [widgetVersions, setWidgetVersions] = useState<Record<string, number>>({});
-  
+
   // 解析消息内容
   const {
     parsedMessage,
     thinking,
     widgets,
+    planners,
     hasWarning
   } = parseMessage(streamingContent || message.content);
 
@@ -70,15 +72,15 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
 
     // 将消息内容按Widget占位符分割
     const parts = parsedMessage.split(/(__WIDGET_PLACEHOLDER_\d+__)/);
-    
+
     return parts.map((part, index) => {
       // 检查是否是Widget占位符
       const placeholderMatch = part.match(/__WIDGET_PLACEHOLDER_(\d+)__/);
-      
+
       if (placeholderMatch) {
         const widgetIndex = parseInt(placeholderMatch[1], 10);
         const widget = widgets[widgetIndex];
-        
+
         if (widget) {
           return (
             <div key={`widget-${index}`} className="my-2">
@@ -93,7 +95,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
           );
         }
       }
-      
+
       // 普通文本内容
       if (part.trim()) {
         return (
@@ -109,7 +111,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
           </ReactMarkdown>
         );
       }
-      
+
       return null;
     });
   };
@@ -129,12 +131,21 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
               thinkingTime={thinkingTime}
             />
           )}
-          
+
+          {/* 显示规划块 */}
+          {planners && planners.length > 0 && planners.map((planner, index) => (
+            <PlannerBlock
+              key={`planner-${index}`}
+              content={planner.content}
+              type={planner.type}
+            />
+          ))}
+
           {/* 渲染消息内容，包括内联的Widget */}
           <div className="markdown-content">
             {renderMessageContent()}
           </div>
-          
+
           {/* 显示警告信息 */}
           {hasWarning && <WarningMessage />}
         </div>

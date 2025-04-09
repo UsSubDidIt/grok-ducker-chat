@@ -39,7 +39,7 @@
   * {
     @apply border-border selection:bg-primary/10 selection:text-primary;
   }
-  
+
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
@@ -90,9 +90,22 @@
   @apply bg-amber-900/30 text-amber-200 p-3 rounded-lg mt-2 text-sm flex items-center gap-2;
 }
 
+/* 规划块样式 */
+.planner-block {
+  @apply bg-blue-900/20 rounded-lg p-3 my-2 border border-blue-800/30;
+}
+
+.planner-header {
+  @apply flex items-center justify-between cursor-pointer text-blue-400;
+}
+
+.planner-content {
+  @apply mt-2 text-blue-100/90 text-sm;
+}
+
 /* 组件卡片样式 */
 .widget-card {
-  @apply bg-grok-darkPurple/50 rounded-lg p-3 my-2 border border-grok-purple/30 
+  @apply bg-grok-darkPurple/50 rounded-lg p-3 my-2 border border-grok-purple/30
     cursor-pointer hover:border-grok-purple/50 transition-colors;
 }
 
